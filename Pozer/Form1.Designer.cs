@@ -42,8 +42,9 @@ namespace Pozer
             this.help.FlatAppearance.BorderSize = 0;
             this.help.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.help.Location = new System.Drawing.Point(0, 0);
+            this.help.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.help.Name = "help";
-            this.help.Size = new System.Drawing.Size(136, 32);
+            this.help.Size = new System.Drawing.Size(121, 26);
             this.help.TabIndex = 0;
             this.help.TabStop = false;
             this.help.Text = "Справка";
@@ -55,9 +56,10 @@ namespace Pozer
             this.wayOfWorking.BackColor = System.Drawing.Color.White;
             this.wayOfWorking.FlatAppearance.BorderSize = 0;
             this.wayOfWorking.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.wayOfWorking.Location = new System.Drawing.Point(142, 0);
+            this.wayOfWorking.Location = new System.Drawing.Point(126, 0);
+            this.wayOfWorking.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.wayOfWorking.Name = "wayOfWorking";
-            this.wayOfWorking.Size = new System.Drawing.Size(156, 32);
+            this.wayOfWorking.Size = new System.Drawing.Size(139, 26);
             this.wayOfWorking.TabIndex = 1;
             this.wayOfWorking.TabStop = false;
             this.wayOfWorking.Text = "Режим работы";
@@ -69,39 +71,45 @@ namespace Pozer
             this.delete.BackColor = System.Drawing.Color.White;
             this.delete.FlatAppearance.BorderSize = 0;
             this.delete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.delete.Location = new System.Drawing.Point(304, 0);
+            this.delete.Location = new System.Drawing.Point(270, 0);
+            this.delete.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.delete.Name = "delete";
-            this.delete.Size = new System.Drawing.Size(150, 32);
+            this.delete.Size = new System.Drawing.Size(133, 26);
             this.delete.TabIndex = 2;
             this.delete.TabStop = false;
             this.delete.Text = "Очистить поле";
             this.delete.UseVisualStyleBackColor = false;
+            this.delete.Click += new System.EventHandler(this.delete_Click);
             // 
             // start
             // 
             this.start.BackColor = System.Drawing.Color.White;
             this.start.FlatAppearance.BorderSize = 0;
             this.start.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.start.Location = new System.Drawing.Point(460, 0);
+            this.start.Location = new System.Drawing.Point(409, 0);
+            this.start.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.start.Name = "start";
-            this.start.Size = new System.Drawing.Size(195, 32);
+            this.start.Size = new System.Drawing.Size(173, 26);
             this.start.TabIndex = 3;
             this.start.TabStop = false;
             this.start.Text = "Начать решение";
             this.start.UseVisualStyleBackColor = false;
+            this.start.Click += new System.EventHandler(this.start_Click);
             // 
             // Main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1178, 644);
+            this.ClientSize = new System.Drawing.Size(1047, 515);
             this.Controls.Add(this.start);
             this.Controls.Add(this.delete);
             this.Controls.Add(this.wayOfWorking);
             this.Controls.Add(this.help);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Main";
             this.Text = "Позиционные игры";
+            this.Load += new System.EventHandler(this.Main_Load);
             this.ResumeLayout(false);
 
         }
