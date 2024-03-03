@@ -10,11 +10,22 @@ using System.Windows.Forms;
 
 namespace Pozer
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
-        public Form1()
+        public Main()
         {
             InitializeComponent();
+        }
+
+        private void help_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void wayOfWorking_Click(object sender, EventArgs e)
+        {
+            Work work = new Work();
+            work.ShowDialog();
         }
     }
 }
