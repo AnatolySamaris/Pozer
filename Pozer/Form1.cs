@@ -19,9 +19,10 @@ namespace Pozer
         private int paintingZeroX = 0;
         private int paintingZeroY = 35;
 
-        private Node root;
-
+        private Node Root;
+        private int TreeHeight = 1;
    
+
         public Main()
         {
             InitializeComponent();
@@ -32,38 +33,75 @@ namespace Pozer
             int XCoordinate = this.paintingZeroX + this.Width / 2 - NodeSize;
             int YCoordinate = this.paintingZeroY;
 
-            if (Parent != null)
+            if (Parent == null)
             {
-                Node child = new Node(Parent.GetLevel() + 1,Parent);
+                this.Root = new Node(1);
+                this.Root.SetPosition(XCoordinate, YCoordinate);
+            } else
+            {
+                Parent.AddChild(
+                    new Node(Parent.GetLevel() + 1, Parent)
+                );
+
+                bool IsNewRow = false;
+                if (Parent.GetLevel() + 1 > this.TreeHeight)
+                {
+                    this.TreeHeight++;
+                    IsNewRow = true;
+
+                }
 
                 int NumberOfChildren = Parent.CountChildren();
                 List<Node> ParentChildren = Parent.GetChildren();
 
                 int RestWidth = this.Width - NodeSize * NumberOfChildren;
                 int SpaceBetweenHorizontal = RestWidth / (NumberOfChildren + 1);
-                //XCoordinate = SpaceBetweenHorizontal * NumberOfChildren + NodeSize * (NumberOfChildren - 1);
 
+
+                // Ставим X позицию для текущего ряда
                 for (int i = 0; i < NumberOfChildren; i++)
                 {
-                    //ParentChildren[i].SetPosition(
-                    //    SpaceBetweenHorizontal * (i + 1) + NodeSize * i,
-                    //    
-                    //);
+                    ParentChildren[i].SetX(SpaceBetweenHorizontal * (i + 1) + NodeSize * i);
                 }
-
-                //int RestHeight = this.Height - this.paintingZeroY - Parent.GetPosition()[1] - NodeSize;
-                //int SpaceBetweenVertical = RestHeight / (NumberOfChildren + 1);
-                //YCoordinate = SpaceBetweenHorizontal * NumberOfChildren + NodeSize * (NumberOfChildren - 1);
-                YCoordinate = Parent.GetPosition()[1] + 100;
+                
+                // Ставим Y позицию для всех элементов кроме корня, если это новый ряд
+                if (IsNewRow)
+                {
+                    int RestHeight = this.Height - this.paintingZeroY - NodeSize;
+                    int SpaceBetweenVertical = RestHeight / this.Height;
+                    for (int i = 0; i < this.Root.CountChildren(); i++)
+                    {
+                        Node node = Root.GetChildren()[i];
+                        for (int j = 0; j < node.CountChildren(); j++)
+                        {
+                            node.SetY(SpaceBetweenVertical * (i + 1) + NodeSize * i);
+                        }
+                    }
+                }
             }
+        }
 
+        private void DrawGraph()
+        {
             graphics = CreateGraphics();
-            graphics.DrawEllipse(
-                Pens.Black,
-                XCoordinate,
-                YCoordinate,
-                NodeSize, NodeSize
-            );
+            foreach (Node node in this.Root.GetChildren())
+            {
+                foreach (Node child in node.GetChildren())
+                {
+                    graphics.DrawEllipse(
+                        Pens.Black,
+                        child.GetX(),
+                        child.GetY(),
+                        NodeSize, NodeSize
+                    );
+                    graphics.FillEllipse(
+                        Brushes.Red,
+                        child.GetX(),
+                        child.GetY(),
+                        NodeSize, NodeSize
+                    );
+                }
+            }
         }
 
         // Обработка клика на кнопку "Справка"
@@ -100,7 +138,15 @@ namespace Pozer
         private void Main_Paint(object sender, PaintEventArgs e)
         {
             paintingZeroX = this.paintingZeroX + this.Width / 2 - NodeSize;
-            //this.CreateNode(paintingZeroX, paintingZeroY);
+            this.CreateNode();
+
+            //this.CreateNode(this.Root);
+            //this.CreateNode(this.Root);
+            //this.CreateNode(this.Root);
+
+            //this.CreateNode(this.Root.GetChildren()[0]);
+
+            this.DrawGraph();
         }
     }
 
@@ -130,6 +176,26 @@ namespace Pozer
         public int GetLevel()
         {
             return this.Level;
+        }
+
+        public int GetX()
+        {
+            return this.XCoordinate;
+        }
+
+        public int GetY()
+        {
+            return this.YCoordinate;
+        }
+
+        public void SetX(int x)
+        {
+            this.XCoordinate = x;
+        }
+
+        public void SetY(int y)
+        {
+            this.YCoordinate = y;
         }
 
         public int[] GetPosition()
