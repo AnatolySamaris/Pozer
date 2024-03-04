@@ -44,7 +44,7 @@ namespace Pozer
             this.help.Location = new System.Drawing.Point(0, 0);
             this.help.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.help.Name = "help";
-            this.help.Size = new System.Drawing.Size(121, 26);
+            this.help.Size = new System.Drawing.Size(150, 30);
             this.help.TabIndex = 0;
             this.help.TabStop = false;
             this.help.Text = "Справка";
@@ -56,10 +56,10 @@ namespace Pozer
             this.wayOfWorking.BackColor = System.Drawing.Color.White;
             this.wayOfWorking.FlatAppearance.BorderSize = 0;
             this.wayOfWorking.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.wayOfWorking.Location = new System.Drawing.Point(126, 0);
+            this.wayOfWorking.Location = new System.Drawing.Point(150, 0);
             this.wayOfWorking.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.wayOfWorking.Name = "wayOfWorking";
-            this.wayOfWorking.Size = new System.Drawing.Size(139, 26);
+            this.wayOfWorking.Size = new System.Drawing.Size(150, 30);
             this.wayOfWorking.TabIndex = 1;
             this.wayOfWorking.TabStop = false;
             this.wayOfWorking.Text = "Режим работы";
@@ -71,10 +71,10 @@ namespace Pozer
             this.delete.BackColor = System.Drawing.Color.White;
             this.delete.FlatAppearance.BorderSize = 0;
             this.delete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.delete.Location = new System.Drawing.Point(270, 0);
+            this.delete.Location = new System.Drawing.Point(300, 0);
             this.delete.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.delete.Name = "delete";
-            this.delete.Size = new System.Drawing.Size(133, 26);
+            this.delete.Size = new System.Drawing.Size(150, 30);
             this.delete.TabIndex = 2;
             this.delete.TabStop = false;
             this.delete.Text = "Очистить поле";
@@ -86,10 +86,10 @@ namespace Pozer
             this.start.BackColor = System.Drawing.Color.White;
             this.start.FlatAppearance.BorderSize = 0;
             this.start.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.start.Location = new System.Drawing.Point(409, 0);
+            this.start.Location = new System.Drawing.Point(450, 0);
             this.start.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.start.Name = "start";
-            this.start.Size = new System.Drawing.Size(173, 26);
+            this.start.Size = new System.Drawing.Size(150, 30);
             this.start.TabIndex = 3;
             this.start.TabStop = false;
             this.start.Text = "Начать решение";
@@ -101,7 +101,7 @@ namespace Pozer
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1047, 515);
+            this.ClientSize = new System.Drawing.Size(1182, 693);
             this.Controls.Add(this.start);
             this.Controls.Add(this.delete);
             this.Controls.Add(this.wayOfWorking);
@@ -110,6 +110,7 @@ namespace Pozer
             this.Name = "Main";
             this.Text = "Позиционные игры";
             this.Load += new System.EventHandler(this.Main_Load);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Main_Paint);
             this.ResumeLayout(false);
 
         }
