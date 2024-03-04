@@ -20,12 +20,12 @@ namespace Pozer
 
         private void ok_Click(object sender, EventArgs e)
         {
-            if (checkFile.Checked && checkManual.Checked)
-            {
-                MessageBox.Show("Можно выбрать только один вариант!");
-            }
+            //if (checkFile.Checked && checkManual.Checked)
+            //{
+            //    MessageBox.Show("Можно выбрать только один вариант!");
+            //}
 
-            else if (checkFile.Checked && !checkManual.Checked)
+            if (checkFile.Checked)
             {
                 Regex regex = new Regex("[0-9]+");
                 if (numberOfVariant.Text == "")
@@ -53,7 +53,7 @@ namespace Pozer
                 }
             }
 
-            else if (!checkFile.Checked && checkManual.Checked)
+            else if (checkManual.Checked)
             {
                 ;
             }
