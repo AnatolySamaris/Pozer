@@ -42,7 +42,7 @@ namespace Pozer
                         }
                         else
                         {
-                            // все хорошо
+                            // выбран ввод из файла
                             ;
                         }
                     }
@@ -55,7 +55,10 @@ namespace Pozer
 
             else if (checkManual.Checked)
             {
-                ;
+                // выбран ручной ввод
+                //Main main = new Main();
+                //main.CreateNode();
+                //main.DrawGraph();
             }
 
             else
