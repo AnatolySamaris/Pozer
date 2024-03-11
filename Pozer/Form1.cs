@@ -178,17 +178,17 @@ namespace Pozer
         //    }
         //}
 
-        private void Main_MouseMove(object sender, MouseEventArgs e)
-        {
-            int X = e.X;
-            int Y = e.Y;
+        //private void Main_MouseMove(object sender, MouseEventArgs e)
+        //{
+        //    int X = e.X;
+        //    int Y = e.Y;
 
-            if (FindNode(X, Y).GetLevel() != -1)
-            {
-                Form formAdd = new Form();
-                formAdd.ShowDialog();
-            }
-        }
+        //    if (FindNode(X, Y).GetLevel() != -1)
+        //    {
+        //        Form formAdd = new Form();
+        //        formAdd.ShowDialog();
+        //    }
+        //}
 
         // Обработка клика правой кнопкой на ноду
         private void Main_MouseClick(object sender, MouseEventArgs e)
@@ -198,10 +198,16 @@ namespace Pozer
                 int X = e.X;
                 int Y = e.Y;
 
-                if (FindNode(X, Y).GetLevel() != -1)
+                Node ChechedNode = new Node();
+                ChechedNode = FindNode(X, Y);
+
+                if (ChechedNode.GetLevel() != -1)
                 {
-                    Form formAdd = new Form();
-                    formAdd.ShowDialog();
+                    ToolStripMenuItem contextMenuItemChild = new ToolStripMenuItem("Добавить ребенка");
+                    ToolStripMenuItem contextMenuItemList = new ToolStripMenuItem("Добавить лист");
+                    ContextMenuStrip contextMenu = new ContextMenuStrip();
+                    contextMenu.Items.AddRange(new[] { contextMenuItemChild, contextMenuItemList });
+                    contextMenu.Show(new Point(ChechedNode.GetX(), ChechedNode.GetY()));
                 }
             }
         }
