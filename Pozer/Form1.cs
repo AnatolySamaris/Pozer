@@ -31,13 +31,15 @@ namespace Pozer
         private void CreateNode(Node Parent = null)
         {
             int XCoordinate = this.paintingZeroX + this.Width / 2 - NodeSize;
+            //int XCoordinate = this.paintingZeroX;
             int YCoordinate = this.paintingZeroY;
 
             if (Parent == null)
             {
                 this.Root = new Node(1);
                 this.Root.SetPosition(XCoordinate, YCoordinate);
-            } else
+            }
+            else
             {
                 Parent.AddChild(
                     new Node(Parent.GetLevel() + 1, Parent)
@@ -81,27 +83,51 @@ namespace Pozer
             }
         }
 
+        private void DrawNode(int X, int Y)
+        {
+            graphics = CreateGraphics();
+            graphics.DrawEllipse(
+                Pens.Black,
+                X, Y,
+                NodeSize, NodeSize);
+        }
+
         private void DrawGraph()
         {
             graphics = CreateGraphics();
-            foreach (Node node in this.Root.GetChildren())
-            {
-                foreach (Node child in node.GetChildren())
-                {
-                    graphics.DrawEllipse(
-                        Pens.Black,
-                        child.GetX(),
-                        child.GetY(),
-                        NodeSize, NodeSize
-                    );
-                    graphics.FillEllipse(
-                        Brushes.Red,
-                        child.GetX(),
-                        child.GetY(),
-                        NodeSize, NodeSize
-                    );
-                }
-            }
+
+            // рисуем начальную вершину
+            graphics.DrawEllipse(
+                Pens.Black,
+                this.Root.GetX(),
+                this.Root.GetY(),
+                NodeSize, NodeSize);
+
+            //Node CurrentNode = new Node();
+            //CurrentNode = Root;
+            //foreach (Node node in CurrentNode.GetChildren())
+            //{
+
+            //}
+
+            //foreach (Node node in this.Root.GetChildren())
+            //{
+            //    foreach (Node child in node.GetChildren())
+            //    {
+            //        graphics.DrawEllipse(
+            //            Pens.Black,
+            //            child.GetX(),
+            //            child.GetY(),
+            //            NodeSize, NodeSize
+            //        );
+            //        graphics.FillEllipse(
+            //            Brushes.Red,
+            //            child.GetX(),
+            //            child.GetY(),
+            //            NodeSize, NodeSize
+            //        );
+            //    }
+            //}
         }
 
         // Обработка клика на кнопку "Справка"
@@ -135,9 +161,76 @@ namespace Pozer
             
         }
 
+        // Обработка наведения мыши на ноду
+        private void Main_MouseEnter(object sender, EventArgs e)
+        {
+            MouseEventArgs mouseEventArgs = e as MouseEventArgs;
+            if (mouseEventArgs != null)
+            {
+                int X = mouseEventArgs.Location.X;
+                int Y = mouseEventArgs.Location.Y;
+
+                if (FindNode(X, Y).GetLevel() != -1)
+                {
+                    Form formAdd = new Form();
+                    formAdd.ShowDialog();
+                }
+            }
+        }
+
+        // поиск вершины
+        private Node FindNode(int X, int Y)
+        {
+            // массив для хранения количества посещенных детей на каждом
+            // уровне
+            int[] VisitedNodes = new int[TreeHeight];
+            Array.Clear(VisitedNodes, 0, TreeHeight);
+            Node CurrentNode = new Node();
+            Node CurrentChild = new Node();
+            CurrentNode = Root;
+
+            if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
+            {
+                return CurrentNode;
+            }
+
+            int Level = 1;
+            while(true)
+            {
+                // проверены не все дети
+                if (VisitedNodes[Level - 1] < CurrentNode.CountChildren())
+                {
+                    CurrentChild = CurrentNode.GetChildren()[VisitedNodes[Level - 1] - 1];
+                    VisitedNodes[Level - 1]++;
+                    Level++;
+                    if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
+                    {
+                        return CurrentChild;
+                    }
+                    else
+                    {
+                        CurrentNode = CurrentChild;
+                    }
+                }
+
+                //проверены все дети текущей вершины
+                else
+                {
+                    CurrentNode = CurrentChild.GetParent();
+                    Level--;
+                }
+
+                if (CurrentNode == Root && VisitedNodes.Length == CurrentNode.CountChildren())
+                {
+                    return new Node(-1);
+                }
+            }
+        }
+
         private void Main_Paint(object sender, PaintEventArgs e)
         {
-            paintingZeroX = this.paintingZeroX + this.Width / 2 - NodeSize;
+            //paintingZeroX = this.paintingZeroX + this.Width / 2 - NodeSize;
+            //paintingZeroX = 0;
             this.CreateNode();
 
             //this.CreateNode(this.Root);
@@ -148,6 +241,7 @@ namespace Pozer
 
             this.DrawGraph();
         }
+
     }
 
 
@@ -158,7 +252,6 @@ namespace Pozer
         int[] Costs = new int[2];   // выигрыши А и В соответственно
         private List<Node> Children = new List<Node>();
         private int XCoordinate, YCoordinate;
-
 
         // Null Object Constructor
         public Node()
@@ -227,6 +320,11 @@ namespace Pozer
         public int CountChildren()
         {
             return this.Children.Count;
+        }
+
+        public Node GetParent()
+        {
+            return this.Parent;
         }
 
         public Node FindChild(int XCoordinate, int YCoordinate, int epsilon = 10)

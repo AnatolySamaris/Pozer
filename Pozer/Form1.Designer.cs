@@ -112,6 +112,7 @@ namespace Pozer
             this.Text = "Позиционные игры";
             this.Load += new System.EventHandler(this.Main_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Main_Paint);
+            this.MouseEnter += new System.EventHandler(this.Main_MouseEnter);
             this.ResumeLayout(false);
 
         }
