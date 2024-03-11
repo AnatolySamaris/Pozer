@@ -152,7 +152,7 @@ namespace Pozer
         // Обработка клика на кнопку "Очистить поле"
         private void delete_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         // Обработка клика на кнопку "Начать решение"
@@ -162,13 +162,41 @@ namespace Pozer
         }
 
         // Обработка наведения мыши на ноду
-        private void Main_MouseEnter(object sender, EventArgs e)
+        //private void Main_MouseEnter(object sender, EventArgs e)
+        //{
+        //    MouseEventArgs mouseEventArgs = e as MouseEventArgs;
+        //    if (mouseEventArgs != null)
+        //    {
+        //        int X = mouseEventArgs.Location.X;
+        //        int Y = mouseEventArgs.Location.Y;
+
+        //        if (FindNode(X, Y).GetLevel() != -1)
+        //        {
+        //            Form formAdd = new Form();
+        //            formAdd.ShowDialog();
+        //        }
+        //    }
+        //}
+
+        private void Main_MouseMove(object sender, MouseEventArgs e)
         {
-            MouseEventArgs mouseEventArgs = e as MouseEventArgs;
-            if (mouseEventArgs != null)
+            int X = e.X;
+            int Y = e.Y;
+
+            if (FindNode(X, Y).GetLevel() != -1)
             {
-                int X = mouseEventArgs.Location.X;
-                int Y = mouseEventArgs.Location.Y;
+                Form formAdd = new Form();
+                formAdd.ShowDialog();
+            }
+        }
+
+        // Обработка клика правой кнопкой на ноду
+        private void Main_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int X = e.X;
+                int Y = e.Y;
 
                 if (FindNode(X, Y).GetLevel() != -1)
                 {
@@ -189,10 +217,10 @@ namespace Pozer
             Node CurrentChild = new Node();
             CurrentNode = Root;
 
-            if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
-            {
-                return CurrentNode;
-            }
+            //if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
+            //{
+            //    return CurrentNode;
+            //}
 
             int Level = 1;
             while(true)
@@ -216,8 +244,22 @@ namespace Pozer
                 //проверены все дети текущей вершины
                 else
                 {
-                    CurrentNode = CurrentChild.GetParent();
-                    Level--;
+                    if (CurrentNode == Root)
+                    {
+                        if (Math.Abs(CurrentNode.GetX() - X) <= 30 && Math.Abs(CurrentNode.GetY() - Y) <= 30)
+                        {
+                            return CurrentNode;
+                        }
+                        else
+                        {
+                            return new Node(-1);
+                        }
+                    }
+                    else
+                    {
+                        CurrentNode = CurrentChild.GetParent();
+                        Level--;
+                    }
                 }
 
                 if (CurrentNode == Root && VisitedNodes.Length == CurrentNode.CountChildren())
@@ -241,7 +283,6 @@ namespace Pozer
 
             this.DrawGraph();
         }
-
     }
 
 
