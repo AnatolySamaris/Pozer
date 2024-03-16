@@ -21,7 +21,10 @@ namespace Pozer
 
         private Node Root;
         private int TreeHeight = 1;
-   
+
+        private Node CheckedNode;
+        //private Node CurrentNode;
+
 
         public Main()
         {
@@ -37,7 +40,9 @@ namespace Pozer
             if (Parent == null)
             {
                 this.Root = new Node(1);
-                this.Root.SetPosition(XCoordinate, YCoordinate);
+                this.Root.SetPosition(this.Width / 2, 0);
+
+                this.CheckedNode = Root;
             }
             else
             {
@@ -198,18 +203,26 @@ namespace Pozer
                 int X = e.X;
                 int Y = e.Y;
 
-                Node ChechedNode = new Node();
-                ChechedNode = FindNode(X, Y);
+                //Node CheckedNode = new Node();
+                CheckedNode = FindNode(X, Y);
 
-                if (ChechedNode.GetLevel() != -1)
+                if (CheckedNode.GetLevel() != -1)
                 {
                     ToolStripMenuItem contextMenuItemChild = new ToolStripMenuItem("Добавить ребенка");
                     ToolStripMenuItem contextMenuItemList = new ToolStripMenuItem("Добавить лист");
                     ContextMenuStrip contextMenu = new ContextMenuStrip();
                     contextMenu.Items.AddRange(new[] { contextMenuItemChild, contextMenuItemList });
-                    contextMenu.Show(new Point(ChechedNode.GetX(), ChechedNode.GetY()));
+                    contextMenu.Show(new Point(CheckedNode.GetX(), CheckedNode.GetY()));
+                    contextMenuItemChild.Click += contextMenuItemChild_Click;
                 }
             }
+        }
+
+        private void contextMenuItemChild_Click(object sender, EventArgs e)
+        {
+            Node Child = new Node();
+            Child.SetParent(CheckedNode);
+            CheckedNode.AddChild(Child);
         }
 
         // поиск вершины
@@ -219,9 +232,10 @@ namespace Pozer
             // уровне
             int[] VisitedNodes = new int[TreeHeight];
             Array.Clear(VisitedNodes, 0, TreeHeight);
-            Node CurrentNode = new Node();
+            Node CurrentNode = new Node(1);
+            CurrentNode.SetPosition(paintingZeroX, paintingZeroY);
             Node CurrentChild = new Node();
-            CurrentNode = Root;
+            //CurrentNode = Root;
 
             //if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
             //{
@@ -250,7 +264,7 @@ namespace Pozer
                 //проверены все дети текущей вершины
                 else
                 {
-                    if (CurrentNode == Root)
+                    if (CurrentNode.GetLevel() == 1)
                     {
                         if (Math.Abs(CurrentNode.GetX() - X) <= 30 && Math.Abs(CurrentNode.GetY() - Y) <= 30)
                         {
@@ -268,18 +282,62 @@ namespace Pozer
                     }
                 }
 
-                if (CurrentNode == Root && VisitedNodes.Length == CurrentNode.CountChildren())
-                {
-                    return new Node(-1);
-                }
+                //if (CurrentNode.GetLevel() == 1 && VisitedNodes.Length == CurrentNode.CountChildren())
+                //{
+                //    return new Node(-1);
+                //}
             }
         }
 
         private void Main_Paint(object sender, PaintEventArgs e)
         {
+            // пока что это исключительно для теста
+            ///////////////////////////////////////////////
+            
+            // массив для хранения количества посещенных детей на каждом
+            // уровне
+            int[] VisitedNodes = new int[TreeHeight];
+            Array.Clear(VisitedNodes, 0, TreeHeight);
+            Node CurrentNode = new Node(1);
+            CurrentNode.SetPosition(paintingZeroX, paintingZeroY);
+            Node CurrentChild = new Node();
+            //CurrentNode = Root;
+
+            int Level = 1;
+            while (true)
+            {
+                // проверены не все дети
+                if (VisitedNodes[Level - 1] < CurrentNode.CountChildren())
+                {
+                    CurrentChild = CurrentNode.GetChildren()[VisitedNodes[Level - 1] - 1];
+                    VisitedNodes[Level - 1]++;
+                    Level++;
+                    DrawNode(CurrentNode.GetX(), CurrentNode.GetY());
+                }
+
+                //проверены все дети текущей вершины
+                else
+                {
+                    if (CurrentNode.GetLevel() == 1)
+                    {
+                        DrawNode(CurrentNode.GetX(), CurrentNode.GetY());
+                        break;
+                    }
+                    else
+                    {
+                        CurrentNode = CurrentChild.GetParent();
+                        Level--;
+                    }
+                }
+            }
+
+            ///////////////////////////////////////////////
+
+
+
             //paintingZeroX = this.paintingZeroX + this.Width / 2 - NodeSize;
             //paintingZeroX = 0;
-            this.CreateNode();
+            //this.CreateNode();
 
             //this.CreateNode(this.Root);
             //this.CreateNode(this.Root);
@@ -287,7 +345,7 @@ namespace Pozer
 
             //this.CreateNode(this.Root.GetChildren()[0]);
 
-            this.DrawGraph();
+            //this.DrawGraph();
         }
     }
 
@@ -367,6 +425,11 @@ namespace Pozer
         public int CountChildren()
         {
             return this.Children.Count;
+        }
+
+        public void SetParent(Node Parent)
+        {
+            this.Parent = Parent;
         }
 
         public Node GetParent()
