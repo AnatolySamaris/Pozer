@@ -31,6 +31,17 @@ namespace Pozer
             InitializeComponent();
         }
 
+
+        public static void GraphTraverse(Node root, IAction action)
+        {
+            action.Function(root);
+
+            foreach (Node child in root.GetChildren())
+            {
+                GraphTraverse(child, action);
+            }
+        }
+
         private void CreateNode(Node Parent = null)
         {
             int XCoordinate = this.paintingZeroX + this.Width / 2 - NodeSize;
@@ -40,7 +51,7 @@ namespace Pozer
             if (Parent == null)
             {
                 this.Root = new Node(1);
-                this.Root.SetPosition(this.Width / 2, 0);
+                this.Root.SetPosition(XCoordinate, YCoordinate);
 
                 this.CheckedNode = Root;
             }
@@ -50,12 +61,13 @@ namespace Pozer
                     new Node(Parent.GetLevel() + 1, Parent)
                 );
 
+
+                // ВСЕ ЧТО НИЖЕ НАХРЕН В ОТДЕЛЬНЫЙ МЕТОД С ДРУГОЙ ЛОГИКОЙ
                 bool IsNewRow = false;
                 if (Parent.GetLevel() + 1 > this.TreeHeight)
                 {
                     this.TreeHeight++;
                     IsNewRow = true;
-
                 }
 
                 int NumberOfChildren = Parent.CountChildren();
@@ -220,9 +232,10 @@ namespace Pozer
 
         private void contextMenuItemChild_Click(object sender, EventArgs e)
         {
-            Node Child = new Node();
-            Child.SetParent(CheckedNode);
-            CheckedNode.AddChild(Child);
+            //Node Child = new Node();
+            //Child.SetParent(CheckedNode);
+            //CheckedNode.AddChild(Child);
+            CreateNode(CheckedNode);
         }
 
         // поиск вершины
@@ -371,6 +384,13 @@ namespace Pozer
             this.Level = level;
         }
 
+        // Для поиска ноды по координатам
+        public Node(int XCoordinate, int YCoordinate)
+        {
+            this.XCoordinate = XCoordinate;
+            this.YCoordinate = YCoordinate;
+        }
+
         public int GetLevel()
         {
             return this.Level;
@@ -450,6 +470,36 @@ namespace Pozer
                 (x, y) => x.Costs[label].CompareTo(y.Costs[label])
             );
             return TempChildren[TempChildren.Count - 1].Costs;
+        }
+    }
+
+    public interface IAction
+    {
+        void Function(Node node);
+    }
+
+    public class FindNodeAction : IAction
+    {
+        // Передается нода содержащая только координаты
+        public void Function(Node node)
+        {
+            // do smth
+        }
+    }
+
+    public class RecalculateNodesAction : IAction
+    {
+        public void Function(Node node = null)
+        {
+            // господи боже
+        }
+    }
+
+    public class DrawNodeAction : IAction
+    {
+        public void Function(Node node = null)
+        {
+            // тупо рисуем ноду
         }
     }
 }
