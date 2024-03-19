@@ -133,7 +133,7 @@ namespace Pozer
             }
             else if (draw == true)
             {
-                DrawNode(root.GetX(), root.GetY());
+                DrawNode(root);
             }
 
             else if (calculate == true)
@@ -184,12 +184,6 @@ namespace Pozer
             if (Parent == null)
             {
                 this.Root = new Node(1);
-                //this.Root.SetPosition(
-                //    this.paintingZeroX + this.Width / 2 - NodeSize,
-                //    this.paintingZeroY
-                //);
-
-                //this.CheckedNode = Root;
             }
             else
             {
@@ -197,16 +191,33 @@ namespace Pozer
                     new Node(Parent.GetLevel() + 1, Parent)
                 );
             }
+
             UpdateTreeHeight();
         }
 
-        public void DrawNode(int X, int Y)
+        public void DrawNode(Node node)
         {
             graphics = CreateGraphics();
             graphics.DrawEllipse(
                 Pens.Black,
-                X, Y,
+                node.GetX(), node.GetY(),
                 NodeSize, NodeSize);
+
+            string label = "A";
+            Font font = new Font("Arial", 12);
+            SizeF labelSize = graphics.MeasureString(label, font);
+            float labelX = node.GetX() + (NodeSize - labelSize.Width) / 2;
+            float labelY = node.GetY() + (NodeSize - labelSize.Height) / 2;
+            if (node.GetLevel() % 2 == 1)
+            {
+                label = "A";
+            }
+            else
+            {
+                label = "B";
+            }
+            SolidBrush brush = new SolidBrush(Color.Black);
+            graphics.DrawString(label, font, brush, labelX, labelY);
         }
 
         private void DrawGraph()
@@ -587,13 +598,13 @@ namespace Pozer
         }
     }
 
-    public class DrawNodeAction : IAction
-    {
-        public void Function(Node node1, Node node2 = null)
-        {
-            // тупо рисуем ноду
-            Main main = new Main();
-            main.DrawNode(node1.GetX(), node2.GetY());
-        }
-    }
+    //public class DrawNodeAction : IAction
+    //{
+    //    public void Function(Node node1, Node node2 = null)
+    //    {
+    //        // тупо рисуем ноду
+    //        Main main = new Main();
+    //        main.DrawNode(node1.GetX(), node2.GetY());
+    //    }
+    //}
 }
