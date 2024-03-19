@@ -25,6 +25,25 @@ namespace Pozer
         private Node CheckedNode;
         //private Node CurrentNode;
 
+        public void SetNodeSize(int NodeSize)
+        {
+            this.NodeSize = NodeSize;
+        }
+
+        public int GetNodeSize()
+        {
+            return this.NodeSize;
+        }
+
+        public void SetCheckedNode(Node CheckedNode)
+        {
+            this.CheckedNode = CheckedNode;
+        }
+
+        public Node GetCheckedNode()
+        {
+            return this.CheckedNode;
+        }
 
         public Main()
         {
@@ -32,75 +51,156 @@ namespace Pozer
         }
 
 
-        public static void GraphTraverse(Node root, IAction action)
+        //public static void GraphTraverse(Node root, IAction action)
+        //{
+        //    action.Function(root);
+
+        //    foreach (Node child in root.GetChildren())
+        //    {
+        //        GraphTraverse(child, action);
+        //    }
+        //}
+
+        public void FindNode(Node node1, Node node2)
         {
-            action.Function(root);
+            if (Math.Abs(node1.GetX() - node2.GetX()) <= NodeSize && Math.Abs(node1.GetY() - node2.GetY()) <= NodeSize)
+            {
+                CheckedNode = node1;
+            }
+        }
+
+        // Рекусивно считает количество нод на уровне
+        private int CountLevelNodes(Node node, Node searchNode)
+        {
+            if (node.GetLevel() == searchNode.GetLevel())
+            {
+                return 1;
+            }
+            else
+            {
+                int count = 0;
+                foreach (Node child in node.GetChildren())
+                {
+                    count += CountLevelNodes(child, searchNode);
+                }
+                return count;
+            }
+        }
+
+        // Рекурсивно ищет порядковый номер ноды на её уровне
+        private int FindNodeLevelOrder(Node root, Node searchNode)
+        {
+            void FillTreeMap(Node node, Dictionary<int, List<Node>> treeMap)
+            {
+                try
+                {
+                    treeMap[node.GetLevel()].Add(node);
+                }
+                catch (KeyNotFoundException)
+                {
+                    treeMap.Add(node.GetLevel(), new List<Node>() { node });
+                }
+                foreach (Node child in node.GetChildren())
+                {
+                    FillTreeMap(child, treeMap);
+                }
+            }
+
+            Dictionary<int, List<Node>> map = new Dictionary<int, List<Node>>();
+            FillTreeMap(root, map);
+            return map[searchNode.GetLevel()].IndexOf(searchNode) + 1;
+        }
+
+        private void RecalculateNode(Node node)
+        {
+            // Считаем Y коодинату
+            int SpaceVertical = (this.Height - this.paintingZeroY - this.NodeSize * this.TreeHeight) / (this.TreeHeight + 1);
+            //int SpaceVertical = 400;
+            node.SetY(this.paintingZeroY + this.NodeSize * (node.GetLevel() - 1) + SpaceVertical * (node.GetLevel() - 1));
+
+            // Считаем X координату
+            int LevelNodesAmount = CountLevelNodes(this.Root, node);
+            int NodeLevelOrder = FindNodeLevelOrder(this.Root, node);
+            int SpaceHoriz = (this.Width - this.NodeSize * LevelNodesAmount) / (LevelNodesAmount + 1);
+            node.SetX(this.paintingZeroX + this.NodeSize * (NodeLevelOrder - 1) + SpaceHoriz * NodeLevelOrder);
+        }
+
+        public void GraphTraverse(Node root, Node node = null, bool draw = false, bool search = false, bool calculate = false)
+        {
+            if (search == true)
+            {
+                FindNode(root, node);
+            }
+            else if (draw == true)
+            {
+                DrawNode(root.GetX(), root.GetY());
+            }
+
+            else if (calculate == true)
+            {
+                RecalculateNode(root);
+            }
 
             foreach (Node child in root.GetChildren())
             {
-                GraphTraverse(child, action);
+                if (search == true)
+                {
+                    GraphTraverse(root: child, node: node, search: true);
+                }
+                else if (draw == true)
+                {
+                    GraphTraverse(root: child, draw: true);
+                }
+                else if(calculate == true)
+                {
+                    GraphTraverse(root: child, calculate: true);
+                }
             }
+        }
+
+        private void UpdateTreeHeight()
+        {
+            int recursiveMaxHeight(Node node)
+            {
+                // Если нет детей
+                if (!node.GetChildren().Any())
+                {
+                    return node.GetLevel();
+                }
+
+                int MaxHeight = 0;
+                foreach (Node child in node.GetChildren())
+                {
+                    MaxHeight = Math.Max(MaxHeight, recursiveMaxHeight(child));
+                }
+                return MaxHeight;
+            }
+
+            this.TreeHeight = Math.Max(this.TreeHeight, recursiveMaxHeight(this.Root));
         }
 
         private void CreateNode(Node Parent = null)
         {
-            int XCoordinate = this.paintingZeroX + this.Width / 2 - NodeSize;
-            //int XCoordinate = this.paintingZeroX;
-            int YCoordinate = this.paintingZeroY;
-
             if (Parent == null)
             {
                 this.Root = new Node(1);
-                this.Root.SetPosition(XCoordinate, YCoordinate);
+                //this.Root.SetPosition(
+                //    this.paintingZeroX + this.Width / 2 - NodeSize,
+                //    this.paintingZeroY
+                //);
 
-                this.CheckedNode = Root;
+                //this.CheckedNode = Root;
             }
             else
             {
                 Parent.AddChild(
                     new Node(Parent.GetLevel() + 1, Parent)
                 );
-
-
-                // ВСЕ ЧТО НИЖЕ НАХРЕН В ОТДЕЛЬНЫЙ МЕТОД С ДРУГОЙ ЛОГИКОЙ
-                bool IsNewRow = false;
-                if (Parent.GetLevel() + 1 > this.TreeHeight)
-                {
-                    this.TreeHeight++;
-                    IsNewRow = true;
-                }
-
-                int NumberOfChildren = Parent.CountChildren();
-                List<Node> ParentChildren = Parent.GetChildren();
-
-                int RestWidth = this.Width - NodeSize * NumberOfChildren;
-                int SpaceBetweenHorizontal = RestWidth / (NumberOfChildren + 1);
-
-
-                // Ставим X позицию для текущего ряда
-                for (int i = 0; i < NumberOfChildren; i++)
-                {
-                    ParentChildren[i].SetX(SpaceBetweenHorizontal * (i + 1) + NodeSize * i);
-                }
-                
-                // Ставим Y позицию для всех элементов кроме корня, если это новый ряд
-                if (IsNewRow)
-                {
-                    int RestHeight = this.Height - this.paintingZeroY - NodeSize;
-                    int SpaceBetweenVertical = RestHeight / this.Height;
-                    for (int i = 0; i < this.Root.CountChildren(); i++)
-                    {
-                        Node node = Root.GetChildren()[i];
-                        for (int j = 0; j < node.CountChildren(); j++)
-                        {
-                            node.SetY(SpaceBetweenVertical * (i + 1) + NodeSize * i);
-                        }
-                    }
-                }
             }
+            UpdateTreeHeight();
         }
 
-        private void DrawNode(int X, int Y)
+        public void DrawNode(int X, int Y)
         {
             graphics = CreateGraphics();
             graphics.DrawEllipse(
@@ -111,14 +211,18 @@ namespace Pozer
 
         private void DrawGraph()
         {
-            graphics = CreateGraphics();
+            graphics.Clear(Color.White);
+            GraphTraverse(root: this.Root, calculate: true);
+            GraphTraverse(root: this.Root, draw: true);
 
-            // рисуем начальную вершину
-            graphics.DrawEllipse(
-                Pens.Black,
-                this.Root.GetX(),
-                this.Root.GetY(),
-                NodeSize, NodeSize);
+            //graphics = CreateGraphics();
+
+            //// рисуем начальную вершину
+            //graphics.DrawEllipse(
+            //    Pens.Black,
+            //    this.Root.GetX(),
+            //    this.Root.GetY(),
+            //    NodeSize, NodeSize);
 
             //Node CurrentNode = new Node();
             //CurrentNode = Root;
@@ -169,7 +273,10 @@ namespace Pozer
         // Обработка клика на кнопку "Очистить поле"
         private void delete_Click(object sender, EventArgs e)
         {
-            
+            TreeHeight = 1;
+            graphics.Clear(Color.White);
+            CreateNode();
+            DrawGraph();
         }
 
         // Обработка клика на кнопку "Начать решение"
@@ -215,8 +322,8 @@ namespace Pozer
                 int X = e.X;
                 int Y = e.Y;
 
-                //Node CheckedNode = new Node();
-                CheckedNode = FindNode(X, Y);
+                Node node = new Node(X, Y);
+                GraphTraverse(root: this.Root, node: node, search: true);
 
                 if (CheckedNode.GetLevel() != -1)
                 {
@@ -235,117 +342,97 @@ namespace Pozer
             //Node Child = new Node();
             //Child.SetParent(CheckedNode);
             //CheckedNode.AddChild(Child);
+
+            //graphics = CreateGraphics();
+            //graphics.Clear(Color.White);
             CreateNode(CheckedNode);
+            //GraphTraverse(root: this.Root, calculate: true);
+            //GraphTraverse(root: this.Root, draw: true);
+            DrawGraph();
         }
 
         // поиск вершины
-        private Node FindNode(int X, int Y)
-        {
-            // массив для хранения количества посещенных детей на каждом
-            // уровне
-            int[] VisitedNodes = new int[TreeHeight];
-            Array.Clear(VisitedNodes, 0, TreeHeight);
-            Node CurrentNode = new Node(1);
-            CurrentNode.SetPosition(paintingZeroX, paintingZeroY);
-            Node CurrentChild = new Node();
-            //CurrentNode = Root;
+        //private Node FindNode(int X, int Y)
+        //{
+        //    // массив для хранения количества посещенных детей на каждом
+        //    // уровне
+        //    int[] VisitedNodes = new int[TreeHeight];
+        //    Array.Clear(VisitedNodes, 0, TreeHeight);
+        //    Node CurrentNode = new Node(1);
+        //    CurrentNode.SetPosition(paintingZeroX, paintingZeroY);
+        //    Node CurrentChild = new Node();
+        //    //CurrentNode = Root;
 
-            //if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
-            //{
-            //    return CurrentNode;
-            //}
+        //    //if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
+        //    //{
+        //    //    return CurrentNode;
+        //    //}
 
-            int Level = 1;
-            while(true)
-            {
-                // проверены не все дети
-                if (VisitedNodes[Level - 1] < CurrentNode.CountChildren())
-                {
-                    CurrentChild = CurrentNode.GetChildren()[VisitedNodes[Level - 1] - 1];
-                    VisitedNodes[Level - 1]++;
-                    Level++;
-                    if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
-                    {
-                        return CurrentChild;
-                    }
-                    else
-                    {
-                        CurrentNode = CurrentChild;
-                    }
-                }
+        //    int Level = 1;
+        //    while(true)
+        //    {
+        //        // проверены не все дети
+        //        if (VisitedNodes[Level - 1] < CurrentNode.CountChildren())
+        //        {
+        //            CurrentChild = CurrentNode.GetChildren()[VisitedNodes[Level - 1] - 1];
+        //            VisitedNodes[Level - 1]++;
+        //            Level++;
+        //            if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
+        //            {
+        //                return CurrentChild;
+        //            }
+        //            else
+        //            {
+        //                CurrentNode = CurrentChild;
+        //            }
+        //        }
 
-                //проверены все дети текущей вершины
-                else
-                {
-                    if (CurrentNode.GetLevel() == 1)
-                    {
-                        if (Math.Abs(CurrentNode.GetX() - X) <= 30 && Math.Abs(CurrentNode.GetY() - Y) <= 30)
-                        {
-                            return CurrentNode;
-                        }
-                        else
-                        {
-                            return new Node(-1);
-                        }
-                    }
-                    else
-                    {
-                        CurrentNode = CurrentChild.GetParent();
-                        Level--;
-                    }
-                }
+        //        //проверены все дети текущей вершины
+        //        else
+        //        {
+        //            if (CurrentNode.GetLevel() == 1)
+        //            {
+        //                if (Math.Abs(CurrentNode.GetX() - X) <= 30 && Math.Abs(CurrentNode.GetY() - Y) <= 30)
+        //                {
+        //                    return CurrentNode;
+        //                }
+        //                else
+        //                {
+        //                    return new Node(-1);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                CurrentNode = CurrentChild.GetParent();
+        //                Level--;
+        //            }
+        //        }
 
-                //if (CurrentNode.GetLevel() == 1 && VisitedNodes.Length == CurrentNode.CountChildren())
-                //{
-                //    return new Node(-1);
-                //}
-            }
-        }
+        //        //if (CurrentNode.GetLevel() == 1 && VisitedNodes.Length == CurrentNode.CountChildren())
+        //        //{
+        //        //    return new Node(-1);
+        //        //}
+        //    }
+        //}
 
         private void Main_Paint(object sender, PaintEventArgs e)
         {
-            // пока что это исключительно для теста
-            ///////////////////////////////////////////////
-            
-            // массив для хранения количества посещенных детей на каждом
-            // уровне
-            int[] VisitedNodes = new int[TreeHeight];
-            Array.Clear(VisitedNodes, 0, TreeHeight);
-            Node CurrentNode = new Node(1);
-            CurrentNode.SetPosition(paintingZeroX, paintingZeroY);
-            Node CurrentChild = new Node();
-            //CurrentNode = Root;
+            graphics = CreateGraphics();
+            //graphics.Clear(Color.White);
+            if (this.Root == null) CreateNode();
+            //GraphTraverse(root: this.Root, calculate: true);
+            //GraphTraverse(root: this.Root, draw: true);
+            DrawGraph();
 
-            int Level = 1;
-            while (true)
-            {
-                // проверены не все дети
-                if (VisitedNodes[Level - 1] < CurrentNode.CountChildren())
-                {
-                    CurrentChild = CurrentNode.GetChildren()[VisitedNodes[Level - 1] - 1];
-                    VisitedNodes[Level - 1]++;
-                    Level++;
-                    DrawNode(CurrentNode.GetX(), CurrentNode.GetY());
-                }
+            //foreach (Node child in this.Root.GetChildren())
+            //{
+            //    int X = child.GetX();
+            //}
 
-                //проверены все дети текущей вершины
-                else
-                {
-                    if (CurrentNode.GetLevel() == 1)
-                    {
-                        DrawNode(CurrentNode.GetX(), CurrentNode.GetY());
-                        break;
-                    }
-                    else
-                    {
-                        CurrentNode = CurrentChild.GetParent();
-                        Level--;
-                    }
-                }
-            }
+            //int height = this.Height;
 
-            ///////////////////////////////////////////////
-
+            //DrawNode(421, 547);
+            //DrawNode(500, 300);
 
 
             //paintingZeroX = this.paintingZeroX + this.Width / 2 - NodeSize;
@@ -475,21 +562,26 @@ namespace Pozer
 
     public interface IAction
     {
-        void Function(Node node);
+        void Function(Node node1, Node node2 = null);
     }
 
     public class FindNodeAction : IAction
     {
-        // Передается нода содержащая только координаты
-        public void Function(Node node)
+        // Передается нода содержащая только координаты 
+        // node1 - текущая, node2 - на которую нажали
+        public void Function(Node node1, Node node2 = null)
         {
-            // do smth
+            Main main = new Main();
+            if (Math.Abs(node1.GetX() - node2.GetX()) <= main.GetNodeSize() && Math.Abs(node1.GetY() - node2.GetY()) <= main.GetNodeSize())
+            {
+                main.SetCheckedNode(node1);
+            }
         }
     }
 
     public class RecalculateNodesAction : IAction
     {
-        public void Function(Node node = null)
+        public void Function(Node node1, Node node2 = null)
         {
             // господи боже
         }
@@ -497,9 +589,11 @@ namespace Pozer
 
     public class DrawNodeAction : IAction
     {
-        public void Function(Node node = null)
+        public void Function(Node node1, Node node2 = null)
         {
             // тупо рисуем ноду
+            Main main = new Main();
+            main.DrawNode(node1.GetX(), node2.GetY());
         }
     }
 }
