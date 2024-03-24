@@ -50,17 +50,6 @@ namespace Pozer
             InitializeComponent();
         }
 
-
-        //public static void GraphTraverse(Node root, IAction action)
-        //{
-        //    action.Function(root);
-
-        //    foreach (Node child in root.GetChildren())
-        //    {
-        //        GraphTraverse(child, action);
-        //    }
-        //}
-
         public void FindNode(Node node1, Node node2)
         {
             if (Math.Abs(node1.GetX() - node2.GetX()) <= NodeSize && Math.Abs(node1.GetY() - node2.GetY()) <= NodeSize)
@@ -131,6 +120,13 @@ namespace Pozer
             {
                 FindNode(root, node);
             }
+
+            else if (draw == true && calculate == true)
+            {
+                RecalculateNode(root);
+                DrawNode(root);
+            }
+
             else if (draw == true)
             {
                 DrawNode(root);
@@ -146,6 +142,10 @@ namespace Pozer
                 if (search == true)
                 {
                     GraphTraverse(root: child, node: node, search: true);
+                }
+                else if (draw == true && calculate == true)
+                {
+                    GraphTraverse(root: child, draw: true, calculate: true);
                 }
                 else if (draw == true)
                 {
@@ -197,12 +197,14 @@ namespace Pozer
 
         public void DrawNode(Node node)
         {
+            // сама нода
             graphics = CreateGraphics();
             graphics.DrawEllipse(
                 Pens.Black,
                 node.GetX(), node.GetY(),
                 NodeSize, NodeSize);
 
+            // надпись
             string label = "A";
             Font font = new Font("Arial", 12);
             SizeF labelSize = graphics.MeasureString(label, font);
@@ -218,48 +220,23 @@ namespace Pozer
             }
             SolidBrush brush = new SolidBrush(Color.Black);
             graphics.DrawString(label, font, brush, labelX, labelY);
+
+            // палочки
+            if (node.GetLevel() > 1)
+            {
+                graphics.DrawLine(
+                Pens.Black,
+                node.GetX() + NodeSize / 2, 
+                node.GetY(),
+                node.GetParent().GetX() + NodeSize / 2, 
+                node.GetParent().GetY() + NodeSize);
+            }
         }
 
         private void DrawGraph()
         {
             graphics.Clear(Color.White);
-            GraphTraverse(root: this.Root, calculate: true);
-            GraphTraverse(root: this.Root, draw: true);
-
-            //graphics = CreateGraphics();
-
-            //// рисуем начальную вершину
-            //graphics.DrawEllipse(
-            //    Pens.Black,
-            //    this.Root.GetX(),
-            //    this.Root.GetY(),
-            //    NodeSize, NodeSize);
-
-            //Node CurrentNode = new Node();
-            //CurrentNode = Root;
-            //foreach (Node node in CurrentNode.GetChildren())
-            //{
-
-            //}
-
-            //foreach (Node node in this.Root.GetChildren())
-            //{
-            //    foreach (Node child in node.GetChildren())
-            //    {
-            //        graphics.DrawEllipse(
-            //            Pens.Black,
-            //            child.GetX(),
-            //            child.GetY(),
-            //            NodeSize, NodeSize
-            //        );
-            //        graphics.FillEllipse(
-            //            Brushes.Red,
-            //            child.GetX(),
-            //            child.GetY(),
-            //            NodeSize, NodeSize
-            //        );
-            //    }
-            //}
+            GraphTraverse(root: this.Root, draw: true, calculate: true);
         }
 
         // Обработка клика на кнопку "Справка"
@@ -296,35 +273,6 @@ namespace Pozer
             
         }
 
-        // Обработка наведения мыши на ноду
-        //private void Main_MouseEnter(object sender, EventArgs e)
-        //{
-        //    MouseEventArgs mouseEventArgs = e as MouseEventArgs;
-        //    if (mouseEventArgs != null)
-        //    {
-        //        int X = mouseEventArgs.Location.X;
-        //        int Y = mouseEventArgs.Location.Y;
-
-        //        if (FindNode(X, Y).GetLevel() != -1)
-        //        {
-        //            Form formAdd = new Form();
-        //            formAdd.ShowDialog();
-        //        }
-        //    }
-        //}
-
-        //private void Main_MouseMove(object sender, MouseEventArgs e)
-        //{
-        //    int X = e.X;
-        //    int Y = e.Y;
-
-        //    if (FindNode(X, Y).GetLevel() != -1)
-        //    {
-        //        Form formAdd = new Form();
-        //        formAdd.ShowDialog();
-        //    }
-        //}
-
         // Обработка клика правой кнопкой на ноду
         private void Main_MouseClick(object sender, MouseEventArgs e)
         {
@@ -336,13 +284,17 @@ namespace Pozer
                 Node node = new Node(X, Y);
                 GraphTraverse(root: this.Root, node: node, search: true);
 
-                if (CheckedNode.GetLevel() != -1)
+                if (CheckedNode != null)
                 {
                     ToolStripMenuItem contextMenuItemChild = new ToolStripMenuItem("Добавить ребенка");
                     ToolStripMenuItem contextMenuItemList = new ToolStripMenuItem("Добавить лист");
                     ContextMenuStrip contextMenu = new ContextMenuStrip();
+
+                    int ContextMenuX = this.Location.X + CheckedNode.GetX() + NodeSize;
+                    int ContextMenuY = this.Location.Y + CheckedNode.GetY() + NodeSize*2;
+
                     contextMenu.Items.AddRange(new[] { contextMenuItemChild, contextMenuItemList });
-                    contextMenu.Show(new Point(CheckedNode.GetX(), CheckedNode.GetY()));
+                    contextMenu.Show(new Point(ContextMenuX, ContextMenuY));
                     contextMenuItemChild.Click += contextMenuItemChild_Click;
                 }
             }
@@ -350,113 +302,15 @@ namespace Pozer
 
         private void contextMenuItemChild_Click(object sender, EventArgs e)
         {
-            //Node Child = new Node();
-            //Child.SetParent(CheckedNode);
-            //CheckedNode.AddChild(Child);
-
-            //graphics = CreateGraphics();
-            //graphics.Clear(Color.White);
             CreateNode(CheckedNode);
-            //GraphTraverse(root: this.Root, calculate: true);
-            //GraphTraverse(root: this.Root, draw: true);
             DrawGraph();
         }
-
-        // поиск вершины
-        //private Node FindNode(int X, int Y)
-        //{
-        //    // массив для хранения количества посещенных детей на каждом
-        //    // уровне
-        //    int[] VisitedNodes = new int[TreeHeight];
-        //    Array.Clear(VisitedNodes, 0, TreeHeight);
-        //    Node CurrentNode = new Node(1);
-        //    CurrentNode.SetPosition(paintingZeroX, paintingZeroY);
-        //    Node CurrentChild = new Node();
-        //    //CurrentNode = Root;
-
-        //    //if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
-        //    //{
-        //    //    return CurrentNode;
-        //    //}
-
-        //    int Level = 1;
-        //    while(true)
-        //    {
-        //        // проверены не все дети
-        //        if (VisitedNodes[Level - 1] < CurrentNode.CountChildren())
-        //        {
-        //            CurrentChild = CurrentNode.GetChildren()[VisitedNodes[Level - 1] - 1];
-        //            VisitedNodes[Level - 1]++;
-        //            Level++;
-        //            if (Math.Abs(CurrentChild.GetX() - X) <= 30 && Math.Abs(CurrentChild.GetY() - Y) <= 30)
-        //            {
-        //                return CurrentChild;
-        //            }
-        //            else
-        //            {
-        //                CurrentNode = CurrentChild;
-        //            }
-        //        }
-
-        //        //проверены все дети текущей вершины
-        //        else
-        //        {
-        //            if (CurrentNode.GetLevel() == 1)
-        //            {
-        //                if (Math.Abs(CurrentNode.GetX() - X) <= 30 && Math.Abs(CurrentNode.GetY() - Y) <= 30)
-        //                {
-        //                    return CurrentNode;
-        //                }
-        //                else
-        //                {
-        //                    return new Node(-1);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                CurrentNode = CurrentChild.GetParent();
-        //                Level--;
-        //            }
-        //        }
-
-        //        //if (CurrentNode.GetLevel() == 1 && VisitedNodes.Length == CurrentNode.CountChildren())
-        //        //{
-        //        //    return new Node(-1);
-        //        //}
-        //    }
-        //}
 
         private void Main_Paint(object sender, PaintEventArgs e)
         {
             graphics = CreateGraphics();
-            //graphics.Clear(Color.White);
             if (this.Root == null) CreateNode();
-            //GraphTraverse(root: this.Root, calculate: true);
-            //GraphTraverse(root: this.Root, draw: true);
             DrawGraph();
-
-            //foreach (Node child in this.Root.GetChildren())
-            //{
-            //    int X = child.GetX();
-            //}
-
-            //int height = this.Height;
-
-            //DrawNode(421, 547);
-            //DrawNode(500, 300);
-
-
-            //paintingZeroX = this.paintingZeroX + this.Width / 2 - NodeSize;
-            //paintingZeroX = 0;
-            //this.CreateNode();
-
-            //this.CreateNode(this.Root);
-            //this.CreateNode(this.Root);
-            //this.CreateNode(this.Root);
-
-            //this.CreateNode(this.Root.GetChildren()[0]);
-
-            //this.DrawGraph();
         }
     }
 
@@ -570,41 +424,4 @@ namespace Pozer
             return TempChildren[TempChildren.Count - 1].Costs;
         }
     }
-
-    public interface IAction
-    {
-        void Function(Node node1, Node node2 = null);
-    }
-
-    public class FindNodeAction : IAction
-    {
-        // Передается нода содержащая только координаты 
-        // node1 - текущая, node2 - на которую нажали
-        public void Function(Node node1, Node node2 = null)
-        {
-            Main main = new Main();
-            if (Math.Abs(node1.GetX() - node2.GetX()) <= main.GetNodeSize() && Math.Abs(node1.GetY() - node2.GetY()) <= main.GetNodeSize())
-            {
-                main.SetCheckedNode(node1);
-            }
-        }
-    }
-
-    public class RecalculateNodesAction : IAction
-    {
-        public void Function(Node node1, Node node2 = null)
-        {
-            // господи боже
-        }
-    }
-
-    //public class DrawNodeAction : IAction
-    //{
-    //    public void Function(Node node1, Node node2 = null)
-    //    {
-    //        // тупо рисуем ноду
-    //        Main main = new Main();
-    //        main.DrawNode(node1.GetX(), node2.GetY());
-    //    }
-    //}
 }
