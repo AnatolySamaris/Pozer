@@ -16,6 +16,7 @@ namespace Pozer
     {
         Graphics graphics;
         private int NodeSize = 30;
+        private int EndNodeSize = 8;
         private int paintingZeroX = 0;
         private int paintingZeroY = 35;
 
@@ -143,14 +144,17 @@ namespace Pozer
                 {
                     GraphTraverse(root: child, node: node, search: true);
                 }
+
                 else if (draw == true && calculate == true)
                 {
                     GraphTraverse(root: child, draw: true, calculate: true);
                 }
+                
                 else if (draw == true)
                 {
                     GraphTraverse(root: child, draw: true);
                 }
+
                 else if(calculate == true)
                 {
                     GraphTraverse(root: child, calculate: true);
@@ -179,7 +183,7 @@ namespace Pozer
             this.TreeHeight = Math.Max(this.TreeHeight, recursiveMaxHeight(this.Root));
         }
 
-        private void CreateNode(Node Parent = null)
+        private void CreateNode(Node Parent = null, bool EndNode = false)
         {
             if (Parent == null)
             {
@@ -187,9 +191,12 @@ namespace Pozer
             }
             else
             {
-                Parent.AddChild(
-                    new Node(Parent.GetLevel() + 1, Parent)
-                );
+                Node node = new Node(Parent.GetLevel() + 1, Parent);
+                if (EndNode) node.SetEndNode(EndNode);
+                Parent.AddChild(node);
+                //Parent.AddChild(
+                //    new Node(Parent.GetLevel() + 1, Parent)
+                //);
             }
 
             UpdateTreeHeight();
@@ -197,44 +204,64 @@ namespace Pozer
 
         public void DrawNode(Node node)
         {
-            // сама нода
-            graphics = CreateGraphics();
-            graphics.DrawEllipse(
+            if (node.GetEndNode())
+            {
+                // сама нода
+                graphics.FillEllipse(
+                Brushes.Black,
+                node.GetX(), node.GetY(),
+                EndNodeSize, EndNodeSize);
+
+                if (node.GetLevel() > 1)
+                {
+                    graphics.DrawLine(
+                        Pens.Black,
+                        node.GetX() + EndNodeSize / 2,
+                        node.GetY(),
+                        node.GetParent().GetX() + NodeSize / 2,
+                        node.GetParent().GetY() + NodeSize);
+                }
+            }
+            else
+            {
+                // сама нода
+                graphics.DrawEllipse(
                 Pens.Black,
                 node.GetX(), node.GetY(),
                 NodeSize, NodeSize);
 
-            // надпись
-            string label = "A";
-            Font font = new Font("Arial", 12);
-            SizeF labelSize = graphics.MeasureString(label, font);
-            float labelX = node.GetX() + (NodeSize - labelSize.Width) / 2;
-            float labelY = node.GetY() + (NodeSize - labelSize.Height) / 2;
-            if (node.GetLevel() % 2 == 1)
-            {
-                label = "A";
-            }
-            else
-            {
-                label = "B";
-            }
-            SolidBrush brush = new SolidBrush(Color.Black);
-            graphics.DrawString(label, font, brush, labelX, labelY);
+                // надпись
+                string label = "A";
+                Font font = new Font("Arial", 12);
+                SizeF labelSize = graphics.MeasureString(label, font);
+                float labelX = node.GetX() + (NodeSize - labelSize.Width) / 2;
+                float labelY = node.GetY() + (NodeSize - labelSize.Height) / 2;
+                if (node.GetLevel() % 2 == 1)
+                {
+                    label = "A";
+                }
+                else
+                {
+                    label = "B";
+                }
+                SolidBrush brush = new SolidBrush(Color.Black);
+                graphics.DrawString(label, font, brush, labelX, labelY);
 
-            // палочки
-            if (node.GetLevel() > 1)
-            {
-                graphics.DrawLine(
-                Pens.Black,
-                node.GetX() + NodeSize / 2, 
-                node.GetY(),
-                node.GetParent().GetX() + NodeSize / 2, 
-                node.GetParent().GetY() + NodeSize);
+                if (node.GetLevel() > 1)
+                {
+                    graphics.DrawLine(
+                        Pens.Black,
+                        node.GetX() + NodeSize / 2,
+                        node.GetY(),
+                        node.GetParent().GetX() + NodeSize / 2,
+                        node.GetParent().GetY() + NodeSize);
+                }
             }
         }
 
         private void DrawGraph()
         {
+            graphics = CreateGraphics();
             graphics.Clear(Color.White);
             GraphTraverse(root: this.Root, draw: true, calculate: true);
         }
@@ -284,7 +311,7 @@ namespace Pozer
                 Node node = new Node(X, Y);
                 GraphTraverse(root: this.Root, node: node, search: true);
 
-                if (CheckedNode != null)
+                if (CheckedNode != null && !CheckedNode.GetEndNode())
                 {
                     ToolStripMenuItem contextMenuItemChild = new ToolStripMenuItem("Добавить ребенка");
                     ToolStripMenuItem contextMenuItemList = new ToolStripMenuItem("Добавить лист");
@@ -296,6 +323,7 @@ namespace Pozer
                     contextMenu.Items.AddRange(new[] { contextMenuItemChild, contextMenuItemList });
                     contextMenu.Show(new Point(ContextMenuX, ContextMenuY));
                     contextMenuItemChild.Click += contextMenuItemChild_Click;
+                    contextMenuItemList.Click += contextMenuItemList_Click;
                 }
             }
         }
@@ -303,6 +331,12 @@ namespace Pozer
         private void contextMenuItemChild_Click(object sender, EventArgs e)
         {
             CreateNode(CheckedNode);
+            DrawGraph();
+        }
+
+        private void contextMenuItemList_Click(object sender, EventArgs e)
+        {
+            CreateNode(CheckedNode, true);
             DrawGraph();
         }
 
@@ -322,6 +356,7 @@ namespace Pozer
         int[] Costs = new int[2];   // выигрыши А и В соответственно
         private List<Node> Children = new List<Node>();
         private int XCoordinate, YCoordinate;
+        bool EndNode;
 
         // Null Object Constructor
         public Node()
@@ -397,6 +432,16 @@ namespace Pozer
         public int CountChildren()
         {
             return this.Children.Count;
+        }
+
+        public void SetEndNode(bool EndNode)
+        {
+            this.EndNode = EndNode;
+        }
+
+        public bool GetEndNode()
+        {
+            return this.EndNode;
         }
 
         public void SetParent(Node Parent)
