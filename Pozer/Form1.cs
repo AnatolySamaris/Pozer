@@ -26,6 +26,8 @@ namespace Pozer
         private Node CheckedNode;
         //private Node CurrentNode;
 
+        private bool Start = false;
+
         public void SetNodeSize(int NodeSize)
         {
             this.NodeSize = NodeSize;
@@ -297,7 +299,16 @@ namespace Pozer
         // Обработка клика на кнопку "Начать решение"
         private void start_Click(object sender, EventArgs e)
         {
-            
+            if (!Start)
+            {
+                Start = true;
+                this.start.BackColor = Color.Gray;
+            }
+            else
+            {
+                Start = false;
+                this.start.BackColor = Color.White;
+            }
         }
 
         // Обработка клика правой кнопкой на ноду
@@ -311,19 +322,22 @@ namespace Pozer
                 Node node = new Node(X, Y);
                 GraphTraverse(root: this.Root, node: node, search: true);
 
-                if (CheckedNode != null && !CheckedNode.GetEndNode())
+                if (!Start)
                 {
-                    ToolStripMenuItem contextMenuItemChild = new ToolStripMenuItem("Добавить ребенка");
-                    ToolStripMenuItem contextMenuItemList = new ToolStripMenuItem("Добавить лист");
-                    ContextMenuStrip contextMenu = new ContextMenuStrip();
+                    if (CheckedNode != null && !CheckedNode.GetEndNode())
+                    {
+                        ToolStripMenuItem contextMenuItemChild = new ToolStripMenuItem("Добавить ребенка");
+                        ToolStripMenuItem contextMenuItemList = new ToolStripMenuItem("Добавить лист");
+                        ContextMenuStrip contextMenu = new ContextMenuStrip();
 
-                    int ContextMenuX = this.Location.X + CheckedNode.GetX() + NodeSize;
-                    int ContextMenuY = this.Location.Y + CheckedNode.GetY() + NodeSize*2;
+                        int ContextMenuX = this.Location.X + CheckedNode.GetX() + NodeSize;
+                        int ContextMenuY = this.Location.Y + CheckedNode.GetY() + NodeSize * 2;
 
-                    contextMenu.Items.AddRange(new[] { contextMenuItemChild, contextMenuItemList });
-                    contextMenu.Show(new Point(ContextMenuX, ContextMenuY));
-                    contextMenuItemChild.Click += contextMenuItemChild_Click;
-                    contextMenuItemList.Click += contextMenuItemList_Click;
+                        contextMenu.Items.AddRange(new[] { contextMenuItemChild, contextMenuItemList });
+                        contextMenu.Show(new Point(ContextMenuX, ContextMenuY));
+                        contextMenuItemChild.Click += contextMenuItemChild_Click;
+                        contextMenuItemList.Click += contextMenuItemList_Click;
+                    }
                 }
             }
         }
