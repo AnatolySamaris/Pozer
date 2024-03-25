@@ -27,8 +27,11 @@ namespace Pozer
         //private Node CurrentNode;
 
         private bool Start = false;
+
         Form CostsForm;
         TextBox CostA;
+        TextBox CostB;
+        Button SetCostButton;
 
         public void SetNodeSize(int NodeSize)
         {
@@ -197,6 +200,8 @@ namespace Pozer
             {
                 Node node = new Node(Parent.GetLevel() + 1, Parent);
                 if (EndNode) node.SetEndNode(EndNode);
+                int[] Costs = { -1, -1 };
+                node.SetCosts(Costs);
                 Parent.AddChild(node);
                 //Parent.AddChild(
                 //    new Node(Parent.GetLevel() + 1, Parent)
@@ -268,6 +273,26 @@ namespace Pozer
             graphics = CreateGraphics();
             graphics.Clear(Color.White);
             GraphTraverse(root: this.Root, draw: true, calculate: true);
+            CheckedNode = null;
+        }
+
+        private bool PossibilitySetCosts()
+        {
+            bool FlagCosts = true;
+            if (CheckedNode.GetEndNode()) return true;
+            else
+            {
+                foreach (Node child in CheckedNode.GetChildren())
+                {
+                    if (child.GetCosts()[0] == -1 && child.GetCosts()[1] == -1)
+                    {
+                        FlagCosts = false;
+                        //return false;
+                    }
+                }
+            }
+            //if (FlagCosts) return true;
+            return FlagCosts;
         }
 
         // Обработка клика на кнопку "Справка"
@@ -343,71 +368,86 @@ namespace Pozer
                 }
                 else
                 {
-                    Form CostsForm = new Form();
+                    if (PossibilitySetCosts())
+                    {
+                        CostsForm = new Form();
 
-                    int CostsFormX = this.Location.X + CheckedNode.GetX() + NodeSize;
-                    int CostsFormY = this.Location.Y + CheckedNode.GetY() + NodeSize * 2;
+                        int CostsFormX = this.Location.X + CheckedNode.GetX() + NodeSize;
+                        int CostsFormY = this.Location.Y + CheckedNode.GetY() + NodeSize * 2;
 
-                    int CostWidth = 40;
-                    int CostHeight = 10;
+                        int CostWidth = 40;
+                        int CostHeight = 10;
 
-                    CostsForm.StartPosition = FormStartPosition.Manual;
-                    CostsForm.Location = new Point(CostsFormX, CostsFormY);
-                    CostsForm.FormBorderStyle = FormBorderStyle.None;
-                    CostsForm.Width = 200;
-                    CostsForm.Height = 100;
-                    //CostsForm.BackColor = Color.White;
+                        CostsForm.StartPosition = FormStartPosition.Manual;
+                        CostsForm.Location = new Point(CostsFormX, CostsFormY);
+                        CostsForm.FormBorderStyle = FormBorderStyle.None;
+                        CostsForm.Width = 200;
+                        CostsForm.Height = 100;
+                        //CostsForm.BackColor = Color.White;
 
-                    Label CostsText = new Label();
-                    CostsText.Text = "Задать выигрыш: ";
-                    CostsText.Font = new Font("Arial", 10);
-                    CostsText.Location = (new Point(5, 5));
-                    CostsText.AutoSize = true;
-                    CostsForm.Controls.Add(CostsText);
+                        Label CostsText = new Label();
+                        CostsText.Text = "Задать выигрыш: ";
+                        CostsText.Font = new Font("Arial", 10);
+                        CostsText.Location = (new Point(5, 5));
+                        CostsText.AutoSize = true;
+                        CostsForm.Controls.Add(CostsText);
 
-                    Label LeftBraket = new Label();
-                    LeftBraket.Text = "(";
-                    LeftBraket.AutoSize = true;
-                    LeftBraket.Location = (new Point(20, 26));
-                    LeftBraket.Font = new Font("Arial", 16);
-                    CostsForm.Controls.Add(LeftBraket);
+                        Label LeftBraket = new Label();
+                        LeftBraket.Text = "(";
+                        LeftBraket.AutoSize = true;
+                        LeftBraket.Location = (new Point(20, 26));
+                        LeftBraket.Font = new Font("Arial", 16);
+                        CostsForm.Controls.Add(LeftBraket);
 
-                    TextBox CostA = new TextBox();
-                    CostA.Location = (new Point(40, 30));
-                    CostA.Width = CostWidth;
-                    CostA.Height = CostHeight;
-                    CostsForm.Controls.Add(CostA);
+                        CostA = new TextBox();
+                        CostA.Location = (new Point(40, 30));
+                        CostA.Width = CostWidth;
+                        CostA.Height = CostHeight;
+                        CostsForm.Controls.Add(CostA);
+                        CostA.TextChanged += CostA_TextChanged;
 
-                    Label Separator = new Label();
-                    Separator.Text = ";";
-                    Separator.AutoSize = true;
-                    Separator.Location = (new Point(CostA.Location.X + CostWidth + 20, 26));
-                    Separator.Font = new Font("Arial", 16);
-                    CostsForm.Controls.Add(Separator);
+                        Label Separator = new Label();
+                        Separator.Text = ";";
+                        Separator.AutoSize = true;
+                        Separator.Location = (new Point(CostA.Location.X + CostWidth + 5, 26));
+                        Separator.Font = new Font("Arial", 16);
+                        CostsForm.Controls.Add(Separator);
 
-                    TextBox CostB = new TextBox();
-                    CostB.Location = (new Point(Separator.Location.X + 20, 30));
-                    CostB.Width = CostWidth;
-                    CostB.Height = CostHeight;
-                    CostsForm.Controls.Add(CostB);
+                        CostB = new TextBox();
+                        CostB.Location = (new Point(Separator.Location.X + 20, 30));
+                        CostB.Width = CostWidth;
+                        CostB.Height = CostHeight;
+                        CostsForm.Controls.Add(CostB);
+                        CostB.TextChanged += CostB_TextChanged;
 
-                    Label RightBraket = new Label();
-                    RightBraket.Text = ")";
-                    RightBraket.AutoSize = true;
-                    RightBraket.Location = (new Point(CostB.Location.X + CostWidth + 20, 26));
-                    RightBraket.Font = new Font("Arial", 16);
-                    CostsForm.Controls.Add(RightBraket);
+                        Label RightBraket = new Label();
+                        RightBraket.Text = ")";
+                        RightBraket.AutoSize = true;
+                        RightBraket.Location = (new Point(CostB.Location.X + CostWidth + 5, 26));
+                        RightBraket.Font = new Font("Arial", 16);
+                        CostsForm.Controls.Add(RightBraket);
 
-                    Button SetCostButton = new Button();
-                    SetCostButton.Text = "Ок";
-                    SetCostButton.Location = (new Point(130, 70));
-                    SetCostButton.Width = 50;
-                    SetCostButton.Height = 25;
-                    SetCostButton.Font = new Font("Arial", 10);
-                    CostsForm.Controls.Add(SetCostButton);
-                    SetCostButton.Click += SetCostButton_Click;
+                        SetCostButton = new Button();
+                        SetCostButton.Text = "Ок";
+                        SetCostButton.Location = (new Point(130, 70));
+                        SetCostButton.Width = 50;
+                        SetCostButton.Height = 25;
+                        SetCostButton.Font = new Font("Arial", 10);
+                        SetCostButton.Enabled = false;
+                        CostsForm.Controls.Add(SetCostButton);
+                        SetCostButton.Click += SetCostButton_Click;
 
-                    CostsForm.ShowDialog();
+                        Button CancelButton = new Button();
+                        CancelButton.Text = "Отмена";
+                        CancelButton.Location = (new Point(20, 70));
+                        CancelButton.Width = 80;
+                        CancelButton.Height = 25;
+                        CancelButton.Font = new Font("Arial", 10);
+                        CostsForm.Controls.Add(CancelButton);
+                        CancelButton.Click += CancelButton_Click;
+
+                        CostsForm.ShowDialog();
+                    }
                 }
             }
         }
@@ -424,9 +464,35 @@ namespace Pozer
             DrawGraph();
         }
 
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            CostsForm.Close();
+        }
+
+        private void CostA_TextChanged(object sender, EventArgs e)
+        {
+            if (CostA.Text != "" && CostB.Text != "")
+            {
+                SetCostButton.Enabled = true;
+            }
+        }
+
+        private void CostB_TextChanged(object sender, EventArgs e)
+        {
+            if (CostA.Text != "" && CostB.Text != "")
+            {
+                SetCostButton.Enabled = true;
+            }
+        }
+
         private void SetCostButton_Click(object sender, EventArgs e)
         {
-            
+            if (CostA.Text != "" && CostB.Text != "")
+            {
+                int[] Costs = { Int32.Parse(CostA.Text), Int32.Parse(CostB.Text) };
+                CheckedNode.SetCosts(Costs);
+                CostsForm.Close();
+            }
         }
 
         private void Main_Paint(object sender, PaintEventArgs e)
@@ -490,6 +556,16 @@ namespace Pozer
         public void SetY(int y)
         {
             this.YCoordinate = y;
+        }
+
+        public void SetCosts(int[] Costs)
+        {
+            this.Costs = Costs;
+        }
+
+        public int[] GetCosts()
+        {
+            return this.Costs;
         }
 
         public int[] GetPosition()
