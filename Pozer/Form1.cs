@@ -33,6 +33,8 @@ namespace Pozer
         TextBox CostB;
         Button SetCostButton;
 
+        PictureBox TestPictureBox;
+
         public void SetNodeSize(int NodeSize)
         {
             this.NodeSize = NodeSize;
@@ -195,6 +197,8 @@ namespace Pozer
             if (Parent == null)
             {
                 this.Root = new Node(1);
+                int[] Costs = { -1, -1 };
+                this.Root.SetCosts(Costs);
             }
             else
             {
@@ -265,6 +269,25 @@ namespace Pozer
                         node.GetParent().GetX() + NodeSize / 2,
                         node.GetParent().GetY() + NodeSize);
                 }
+            }
+
+            // если выигрыши заданы - вывести их
+            if (node.GetCosts()[0] != -1 && node.GetCosts()[1] != -1)
+            {
+                string CostsLabel = "(" + node.GetCosts()[0].ToString() + "; " + node.GetCosts()[1].ToString() + ")";
+                Font font = new Font("Arial", 8);
+                float CostsLabelX, CostsLabelY;
+                if (node.GetEndNode())
+                {
+                    CostsLabelX = node.GetX() + EndNodeSize;
+                    CostsLabelY = node.GetY() + EndNodeSize;
+                }
+                else
+                {
+                    CostsLabelX = node.GetX() + NodeSize;
+                    CostsLabelY = node.GetY() + NodeSize;
+                }
+                graphics.DrawString(CostsLabel, font, Brushes.Black, CostsLabelX, CostsLabelY);
             }
         }
 
@@ -492,6 +515,7 @@ namespace Pozer
                 int[] Costs = { Int32.Parse(CostA.Text), Int32.Parse(CostB.Text) };
                 CheckedNode.SetCosts(Costs);
                 CostsForm.Close();
+                DrawGraph();
             }
         }
 
@@ -501,6 +525,12 @@ namespace Pozer
             if (this.Root == null) CreateNode();
             DrawGraph();
         }
+
+        //private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        //{
+        //    if (this.Root == null) CreateNode();
+        //    DrawGraph();
+        //}
     }
 
 
