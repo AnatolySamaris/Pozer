@@ -515,7 +515,7 @@ namespace Pozer
                 int[] Costs = { Int32.Parse(CostA.Text), Int32.Parse(CostB.Text) };
                 CheckedNode.SetCosts(Costs);
                 CostsForm.Close();
-                DrawGraph();
+                DrawNode(CheckedNode);
             }
         }
 
