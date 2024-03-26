@@ -14,7 +14,7 @@ namespace Pozer
 
     public partial class Main : Form
     {
-        Graphics graphics;
+        //Graphics graphics;
         private int NodeSize = 30;
         private int EndNodeSize = 8;
         private int paintingZeroX = 0;
@@ -56,6 +56,7 @@ namespace Pozer
         public Main()
         {
             InitializeComponent();
+            DoubleBuffered = true;
         }
 
         public void FindNode(Node node1, Node node2)
@@ -122,7 +123,7 @@ namespace Pozer
             node.SetX(this.paintingZeroX + this.NodeSize * (NodeLevelOrder - 1) + SpaceHoriz * NodeLevelOrder);
         }
 
-        public void GraphTraverse(Node root, Node node = null, bool draw = false, bool search = false, bool calculate = false)
+        public void GraphTraverse(Node root, Node node = null, Graphics graphics = null, bool draw = false, bool search = false, bool calculate = false)
         {
             if (search == true)
             {
@@ -132,12 +133,12 @@ namespace Pozer
             else if (draw == true && calculate == true)
             {
                 RecalculateNode(root);
-                DrawNode(root);
+                DrawNode(graphics, root);
             }
 
             else if (draw == true)
             {
-                DrawNode(root);
+                DrawNode(graphics, root);
             }
 
             else if (calculate == true)
@@ -154,12 +155,12 @@ namespace Pozer
 
                 else if (draw == true && calculate == true)
                 {
-                    GraphTraverse(root: child, draw: true, calculate: true);
+                    GraphTraverse(root: child, graphics: graphics, draw: true, calculate: true);
                 }
                 
                 else if (draw == true)
                 {
-                    GraphTraverse(root: child, draw: true);
+                    GraphTraverse(root: child, graphics: graphics, draw: true);
                 }
 
                 else if(calculate == true)
@@ -211,7 +212,7 @@ namespace Pozer
             UpdateTreeHeight();
         }
 
-        public void DrawNode(Node node)
+        public void DrawNode(Graphics graphics, Node node)
         {
             if (node.GetEndNode())
             {
@@ -268,11 +269,11 @@ namespace Pozer
             }
         }
 
-        private void DrawGraph()
+        private void DrawGraph(Graphics graphics)
         {
-            graphics = CreateGraphics();
-            graphics.Clear(Color.White);
-            GraphTraverse(root: this.Root, draw: true, calculate: true);
+            //graphics = CreateGraphics();
+            //graphics.Clear(Color.White);
+            GraphTraverse(root: Root, graphics: graphics, draw: true, calculate: true);
             CheckedNode = null;
         }
 
@@ -317,10 +318,12 @@ namespace Pozer
         // Обработка клика на кнопку "Очистить поле"
         private void delete_Click(object sender, EventArgs e)
         {
+            Root = null;
             TreeHeight = 1;
-            graphics.Clear(Color.White);
-            CreateNode();
-            DrawGraph();
+            Invalidate();
+            //graphics.Clear(Color.White);
+            //CreateNode();
+            //DrawGraph();
         }
 
         // Обработка клика на кнопку "Начать решение"
@@ -385,64 +388,80 @@ namespace Pozer
                         CostsForm.Height = 100;
                         //CostsForm.BackColor = Color.White;
 
-                        Label CostsText = new Label();
-                        CostsText.Text = "Задать выигрыш: ";
-                        CostsText.Font = new Font("Arial", 10);
-                        CostsText.Location = (new Point(5, 5));
-                        CostsText.AutoSize = true;
+                        Label CostsText = new Label()
+                        {
+                            Text = "Задать выигрыш: ",
+                            Font = new Font("Arial", 10),
+                            Location = (new Point(5, 5)),
+                            AutoSize = true
+                        };
                         CostsForm.Controls.Add(CostsText);
 
-                        Label LeftBraket = new Label();
-                        LeftBraket.Text = "(";
-                        LeftBraket.AutoSize = true;
-                        LeftBraket.Location = (new Point(20, 26));
-                        LeftBraket.Font = new Font("Arial", 16);
+                        Label LeftBraket = new Label()
+                        {
+                            Text = "(",
+                            AutoSize = true,
+                            Location = (new Point(20, 26)),
+                            Font = new Font("Arial", 16)
+                        };
                         CostsForm.Controls.Add(LeftBraket);
 
-                        CostA = new TextBox();
-                        CostA.Location = (new Point(40, 30));
-                        CostA.Width = CostWidth;
-                        CostA.Height = CostHeight;
+                        CostA = new TextBox()
+                        {
+                            Location = (new Point(40, 30)),
+                            Width = CostWidth,
+                            Height = CostHeight
+                        };
                         CostsForm.Controls.Add(CostA);
                         CostA.TextChanged += CostA_TextChanged;
 
-                        Label Separator = new Label();
-                        Separator.Text = ";";
-                        Separator.AutoSize = true;
-                        Separator.Location = (new Point(CostA.Location.X + CostWidth + 5, 26));
-                        Separator.Font = new Font("Arial", 16);
+                        Label Separator = new Label()
+                        {
+                            Text = ";",
+                            AutoSize = true,
+                            Location = (new Point(CostA.Location.X + CostWidth + 5, 26)),
+                            Font = new Font("Arial", 16)
+                        };
                         CostsForm.Controls.Add(Separator);
 
-                        CostB = new TextBox();
-                        CostB.Location = (new Point(Separator.Location.X + 20, 30));
-                        CostB.Width = CostWidth;
-                        CostB.Height = CostHeight;
+                        CostB = new TextBox()
+                        {
+                            Location = (new Point(Separator.Location.X + 20, 30)),
+                            Width = CostWidth,
+                            Height = CostHeight
+                        };
                         CostsForm.Controls.Add(CostB);
                         CostB.TextChanged += CostB_TextChanged;
 
-                        Label RightBraket = new Label();
-                        RightBraket.Text = ")";
-                        RightBraket.AutoSize = true;
-                        RightBraket.Location = (new Point(CostB.Location.X + CostWidth + 5, 26));
-                        RightBraket.Font = new Font("Arial", 16);
+                        Label RightBraket = new Label()
+                        {
+                            Text = ")",
+                            AutoSize = true,
+                            Location = (new Point(CostB.Location.X + CostWidth + 5, 26)),
+                            Font = new Font("Arial", 16)
+                        };
                         CostsForm.Controls.Add(RightBraket);
 
-                        SetCostButton = new Button();
-                        SetCostButton.Text = "Ок";
-                        SetCostButton.Location = (new Point(130, 70));
-                        SetCostButton.Width = 50;
-                        SetCostButton.Height = 25;
-                        SetCostButton.Font = new Font("Arial", 10);
-                        SetCostButton.Enabled = false;
+                        SetCostButton = new Button
+                        {
+                            Text = "Ок",
+                            Location = (new Point(130, 70)),
+                            Width = 50,
+                            Height = 25,
+                            Font = new Font("Arial", 10),
+                            Enabled = false
+                        };
                         CostsForm.Controls.Add(SetCostButton);
                         SetCostButton.Click += SetCostButton_Click;
 
-                        Button CancelButton = new Button();
-                        CancelButton.Text = "Отмена";
-                        CancelButton.Location = (new Point(20, 70));
-                        CancelButton.Width = 80;
-                        CancelButton.Height = 25;
-                        CancelButton.Font = new Font("Arial", 10);
+                        Button CancelButton = new Button()
+                        {
+                            Text = "Отмена",
+                            Location = (new Point(20, 70)),
+                            Width = 80,
+                            Height = 25,
+                            Font = new Font("Arial", 10),
+                        };
                         CostsForm.Controls.Add(CancelButton);
                         CancelButton.Click += CancelButton_Click;
 
@@ -455,13 +474,15 @@ namespace Pozer
         private void contextMenuItemChild_Click(object sender, EventArgs e)
         {
             CreateNode(CheckedNode);
-            DrawGraph();
+            //DrawGraph();
+            Invalidate();
         }
 
         private void contextMenuItemList_Click(object sender, EventArgs e)
         {
             CreateNode(CheckedNode, true);
-            DrawGraph();
+            //DrawGraph();
+            Invalidate();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -495,11 +516,20 @@ namespace Pozer
             }
         }
 
+        //private void Main_Paint(object sender, PaintEventArgs e)
+        //{
+        //    //graphics = CreateGraphics();
+        //    Graphics graphics = e.Graphics;
+        //    if (this.Root == null) CreateNode();
+        //    DrawGraph(graphics);
+        //}
+
         private void Main_Paint(object sender, PaintEventArgs e)
         {
-            graphics = CreateGraphics();
-            if (this.Root == null) CreateNode();
-            DrawGraph();
+            //e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            if (Root == null) CreateNode();
+            DrawGraph(e.Graphics);
+            e.Dispose();
         }
     }
 
